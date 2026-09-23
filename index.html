@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Поиск по базам</title>
+<style>
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #0f1115;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 { color: #4cafef; margin-top: 0; }
+  .search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    max-width: 900px;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 14px;
+    font-size: 18px;
+    background: #1b1f26;
+    border: 1px solid #2a2f38;
+    border-radius: 8px;
+    color: #e6e6e6;
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: #4cafef; }
+  button {
+    padding: 14px 24px;
+    font-size: 16px;
+    background: #4cafef;
+    color: #0f1115;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button:hover { background: #6bc2ff; }
+  button:disabled { background: #2a2f38; color: #777; cursor: wait; }
+  .stats {
+    padding: 12px 16px;
+    background: #1b1f26;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: monospace;
+    font-size: 14px;
+    color: #999;
+    max-width: 900px;
+  }
+  .stats b { color: #4cafef; }
+  .result {
+    background: #1b1f26;
+    border-left: 4px solid #4cafef;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    word-break: break-all;
+  }
+  .result .source {
+    color: #4cafef;
+    font-size: 12px;
+    margin-bottom: 6px;
+    font-family: monospace;
+  }
+  .result .raw {
+    font-family: monospace;
+    font-size: 14px;
+    white-space: pre-wrap;
+  }
+  .empty { color: #777; text-align: center; padding: 40px; }
+  .error { color: #ff6b6b; padding: 20px; }
+  .field-picker {
+    margin-bottom: 20px;
+    max-width: 900px;
+  }
+  .field-picker select {
+    padding: 10px;
+    background: #1b1f26;
+    color: #e6e6e6;
+    border: 1px solid #2a2f38;
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 200px;
+  }
+</style>
+</head>
+<body>
+  <h1>🔍 Поиск по базам</h1>
+
+  <div class="field-picker">
+    <label style="color:#999;margin-right:10px;">Поле:</label>
+    <select id="field">
+      <option value="">везде (FTS)</option>
+      <option value="inn">inn</option>
+      <option value="phone">phone</option>
+      <option value="telegram_id">telegram_id</option>
+      <option value="snils">snils</option>
+      <option value="passport">passport</option>
+      <option value="fio">fio</option>
+      <option value="surname">surname</option>
+      <option value="name">name</option>
+      <option value="username">username</option>
+      <option value="dob">dob</option>
+      <option value="email">email</option>
+    </select>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="q" placeholder="Введите номер, ФИО, ИНН, СНИЛС..." autofocus>
+    <button id="go">Искать</button>
+  </div>
+
+  <div class="stats" id="stats" style="display:none;"></div>
+  <div id="results"></div>
+
+<script>
+const qInput = document.getElementById('q');
+const fieldSel = document.getElementById('field');
+const goBtn = document.getElementById('go');
+const stats = document.getElementById('stats');
+const results = document.getElementById('results');
+
+async function doSearch() {
+  const q = qInput.value.trim();
+  if (!q) return;
+
+  goBtn.disabled = true;
+  goBtn.textContent = 'Ищу...';
+  stats.style.display = 'none';
+  results.innerHTML = '';
+
+  const field = fieldSel.value;
+  const url = `/api/search?q=${encodeURIComponent(q)}&field=${encodeURIComponent(field)}`;
+
+  try {
+    const t0 = performance.now();
+    const resp = await fetch(url);
+    const data = await resp.json();
+    const dt = Math.round(performance.now() - t0);
+
+    if (data.error) {
+      results.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
+      return;
+    }
+
+    stats.style.display = 'block';
+    stats.innerHTML = `
+      Запрос: <b>${escapeHtml(q)}</b> | Поле: <b>${field || 'все'}</b><br>
+      Баз: <b>${data.total_dbs}</b> | С совпадениями: <b>${data.ok}</b> | Пустых: <b>${data.empty}</b> | Пропущено: <b>${data.timeout}</b> | Ошибок: <b>${data.errors}</b><br>
+      Найдено: <b>${data.results.length}</b> | Сервер: <b>${data.time}s</b> | Клиент: <b>${dt}ms</b>
+    `;
+
+    if (!data.results.length) {
+      results.innerHTML = '<div class="empty">Ничего не найдено</div>';
+      return;
+    }
+
+    for (const r of data.results) {
+      const div = document.createElement('div');
+      div.className = 'result';
+      div.innerHTML = `
+        <div class="source">${escapeHtml(r.source)}</div>
+        <div class="raw">${escapeHtml(r.raw)}</div>
+      `;
+      results.appendChild(div);
+    }
+  } catch (e) {
+    results.innerHTML = `<div class="error">Ошибка: ${e.message}</div>`;
+  } finally {
+    goBtn.disabled = false;
+    goBtn.textContent = 'Искать';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+goBtn.addEventListener('click', doSearch);
+qInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>
