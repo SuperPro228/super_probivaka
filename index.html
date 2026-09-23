@@ -59,6 +59,7 @@
     margin-bottom: 10px;
     border-radius: 4px;
     word-break: break-all;
+    max-width: 900px;
   }
   .result .source {
     color: #4cafef;
@@ -73,6 +74,7 @@
   }
   .empty { color: #777; text-align: center; padding: 40px; }
   .error { color: #ff6b6b; padding: 20px; }
+  .status { color: #ffaa33; padding: 10px 0; }
   .field-picker {
     margin-bottom: 20px;
     max-width: 900px;
@@ -97,80 +99,122 @@
       <option value="">везде (FTS)</option>
       <option value="inn">inn</option>
       <option value="phone">phone</option>
-      <option value="telegram_id">telegram_id</option>
+      <option value="fio">fio</option>
       <option value="snils">snils</option>
       <option value="passport">passport</option>
-      <option value="fio">fio</option>
-      <option value="surname">surname</option>
-      <option value="name">name</option>
-      <option value="username">username</option>
-      <option value="dob">dob</option>
       <option value="email">email</option>
     </select>
   </div>
 
   <div class="search-box">
-    <input type="text" id="q" placeholder="Введите номер, ФИО, ИНН, СНИЛС..." autofocus>
+    <input type="text" id="q" placeholder="Введите номер, ФИО, ИНН..." autofocus>
     <button id="go">Искать</button>
   </div>
 
   <div class="stats" id="stats" style="display:none;"></div>
   <div id="results"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDTbyu1HfyZ1ETvidxnexV6pON0gDO-8XQ",
+  authDomain: "databaseee-324e7.firebaseapp.com",
+  projectId: "databaseee-324e7",
+  storageBucket: "databaseee-324e7.firebasestorage.app",
+  messagingSenderId: "837279132183",
+  appId: "1:837279132183:web:5583196f539916dcf14a52"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const qInput = document.getElementById('q');
 const fieldSel = document.getElementById('field');
 const goBtn = document.getElementById('go');
 const stats = document.getElementById('stats');
 const results = document.getElementById('results');
 
+let currentUnsub = null;
+
 async function doSearch() {
   const q = qInput.value.trim();
   if (!q) return;
 
+  if (currentUnsub) { currentUnsub(); currentUnsub = null; }
+
   goBtn.disabled = true;
   goBtn.textContent = 'Ищу...';
   stats.style.display = 'none';
-  results.innerHTML = '';
+  results.innerHTML = '<div class="status">Отправлен запрос на сервер...</div>';
 
   const field = fieldSel.value;
-  const url = `/api/search?q=${encodeURIComponent(q)}&field=${encodeURIComponent(field)}`;
 
   try {
+    const reqRef = await addDoc(collection(db, "requests"), {
+      query: q,
+      field: field,
+      status: "pending",
+      createdAt: serverTimestamp(),
+    });
+
     const t0 = performance.now();
-    const resp = await fetch(url);
-    const data = await resp.json();
-    const dt = Math.round(performance.now() - t0);
 
-    if (data.error) {
-      results.innerHTML = `<div class="error">Ошибка: ${data.error}</div>`;
-      return;
-    }
+    currentUnsub = onSnapshot(doc(db, "requests", reqRef.id), (snap) => {
+      const d = snap.data();
+      if (!d) return;
 
-    stats.style.display = 'block';
-    stats.innerHTML = `
-      Запрос: <b>${escapeHtml(q)}</b> | Поле: <b>${field || 'все'}</b><br>
-      Баз: <b>${data.total_dbs}</b> | С совпадениями: <b>${data.ok}</b> | Пустых: <b>${data.empty}</b> | Пропущено: <b>${data.timeout}</b> | Ошибок: <b>${data.errors}</b><br>
-      Найдено: <b>${data.results.length}</b> | Сервер: <b>${data.time}s</b> | Клиент: <b>${dt}ms</b>
-    `;
+      if (d.status === "pending") {
+        results.innerHTML = '<div class="status">Запрос в очереди...</div>';
+        return;
+      }
+      if (d.status === "processing") {
+        results.innerHTML = '<div class="status">Сервер обрабатывает запрос...</div>';
+        return;
+      }
+      if (d.status === "error") {
+        results.innerHTML = `<div class="error">Ошибка: ${d.error || "неизвестно"}</div>`;
+        goBtn.disabled = false;
+        goBtn.textContent = 'Искать';
+        if (currentUnsub) { currentUnsub(); currentUnsub = null; }
+        return;
+      }
+      if (d.status === "done") {
+        const dt = Math.round(performance.now() - t0);
+        const data = d.result || {};
 
-    if (!data.results.length) {
-      results.innerHTML = '<div class="empty">Ничего не найдено</div>';
-      return;
-    }
+        stats.style.display = 'block';
+        stats.innerHTML = `
+          Запрос: <b>${escapeHtml(q)}</b> | Поле: <b>${field || 'все'}</b><br>
+          Баз: <b>${data.total_dbs || 0}</b> | С совпадениями: <b>${data.ok || 0}</b> | Пустых: <b>${data.empty || 0}</b> | Пропущено: <b>${data.timeout || 0}</b> | Ошибок: <b>${data.errors || 0}</b><br>
+          Найдено: <b>${(data.results || []).length}</b> | Сервер: <b>${data.time || 0}s</b> | Клиент: <b>${dt}ms</b>
+        `;
 
-    for (const r of data.results) {
-      const div = document.createElement('div');
-      div.className = 'result';
-      div.innerHTML = `
-        <div class="source">${escapeHtml(r.source)}</div>
-        <div class="raw">${escapeHtml(r.raw)}</div>
-      `;
-      results.appendChild(div);
-    }
+        const items = data.results || [];
+        if (!items.length) {
+          results.innerHTML = '<div class="empty">Ничего не найдено</div>';
+        } else {
+          results.innerHTML = '';
+          for (const r of items) {
+            const div = document.createElement('div');
+            div.className = 'result';
+            div.innerHTML = `
+              <div class="source">${escapeHtml(r.source)}</div>
+              <div class="raw">${escapeHtml(r.raw)}</div>
+            `;
+            results.appendChild(div);
+          }
+        }
+        goBtn.disabled = false;
+        goBtn.textContent = 'Искать';
+        if (currentUnsub) { currentUnsub(); currentUnsub = null; }
+      }
+    });
   } catch (e) {
     results.innerHTML = `<div class="error">Ошибка: ${e.message}</div>`;
-  } finally {
     goBtn.disabled = false;
     goBtn.textContent = 'Искать';
   }
