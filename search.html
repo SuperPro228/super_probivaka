@@ -3,293 +3,256 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ПРОБИВ — Поиск</title>
+<title>ПРОБИВ</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; }
+html { scroll-behavior: smooth; }
+html, body { min-height: 100%; }
 body {
-    background: #050505;
+    background: #0a0a0a;
     color: #fff;
-    font-family: 'Courier New', Consolas, monospace;
-    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    overflow-x: hidden;
 }
 
-/* =========================
-   FULLSCREEN OVERLAY
-========================= */
 .overlay {
-    position: fixed;
-    inset: 0;
-    background: #050505;
-    z-index: 1000;
+    min-height: 100vh;
+    background: #0a0a0a;
     display: flex;
     flex-direction: column;
-    padding: 40px 60px;
+    padding: 24px 50px 60px;
+    animation: overlayIn .6s ease forwards;
     opacity: 0;
-    animation: overlayIn .7s ease forwards;
 }
 @keyframes overlayIn { to { opacity: 1; } }
 
-/* =========================
-   TOP BAR
-========================= */
+/* TOP BAR */
 .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px; flex-shrink: 0;
 }
 .back-btn {
-    color: #fff;
-    text-decoration: none;
-    font-size: 12px;
-    letter-spacing: 4px;
-    padding: 10px 20px;
-    border: 1px solid #333;
-    transition: .3s ease;
-    text-transform: uppercase;
+    color: #888; text-decoration: none; font-size: 13px;
+    letter-spacing: 2px; padding: 10px 22px;
+    border: 1px solid #1e1e1e; border-radius: 999px;
+    transition: .3s ease; text-transform: uppercase;
 }
-.back-btn:hover {
-    background: #fff;
-    color: #000;
-    border-color: #fff;
-    letter-spacing: 6px;
-}
-.title {
-    font-size: 14px;
-    letter-spacing: 8px;
-    color: #666;
-    text-transform: uppercase;
-}
+.back-btn:hover { color: #fff; border-color: #fff; background: #151515; }
+.title { font-size: 12px; letter-spacing: 6px; color: #444; text-transform: uppercase; }
 
-/* =========================
-   SEARCH INPUT
-========================= */
+/* SEARCH */
 .search-wrap {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-    max-width: 1200px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
+    display: flex; gap: 12px;
+    max-width: 900px; width: 100%;
+    margin: 0 auto 16px; flex-shrink: 0;
 }
 .search-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid #222;
-    color: #fff;
-    font-family: inherit;
-    font-size: 42px;
-    padding: 18px 0;
-    outline: none;
-    letter-spacing: 2px;
-    transition: border-color .3s ease;
+    flex: 1; background: #141414;
+    border: 1px solid #1e1e1e; border-radius: 999px;
+    color: #fff; font-family: inherit; font-size: 16px;
+    padding: 14px 24px; outline: none; transition: .3s ease;
 }
-.search-input::placeholder {
-    color: #333;
-    font-weight: 300;
-    letter-spacing: 3px;
-}
-.search-input:focus {
-    border-bottom-color: #fff;
-}
-
+.search-input::placeholder { color: #444; }
+.search-input:focus { border-color: #fff; background: #181818; }
 .search-btn {
-    background: transparent;
-    border: 2px solid #fff;
-    color: #fff;
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 800;
-    padding: 14px 40px;
-    cursor: pointer;
-    letter-spacing: 8px;
-    text-transform: uppercase;
-    transition: .3s ease;
-    position: relative;
-    overflow: hidden;
-    align-self: flex-end;
+    background: #fff; color: #000; border: none;
+    border-radius: 999px; font-family: inherit;
+    font-size: 13px; font-weight: 700; padding: 0 32px;
+    cursor: pointer; letter-spacing: 2px; text-transform: uppercase;
+    transition: .3s ease; flex-shrink: 0;
 }
-.search-btn:hover {
-    background: #fff;
-    color: #000;
-    letter-spacing: 10px;
-}
-.search-btn:disabled {
-    color: #666;
-    border-color: #333;
-    cursor: wait;
-}
+.search-btn:hover { background: #ddd; transform: scale(1.02); }
+.search-btn:active { transform: scale(.98); }
+.search-btn:disabled { background: #2a2a2a; color: #666; cursor: wait; transform: none; }
 
-/* =========================
-   OPTIONS ROW
-========================= */
+/* OPTIONS */
 .options {
-    display: flex;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto 40px;
-    flex-wrap: wrap;
-    align-items: center;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: #666;
+    display: flex; gap: 16px;
+    max-width: 900px; margin: 0 auto 40px;
+    flex-wrap: wrap; align-items: center;
+    font-size: 11px; color: #666;
+    letter-spacing: 1px; flex-shrink: 0;
 }
-.options label {
-    text-transform: uppercase;
+.options label { text-transform: uppercase; }
+.options select, .options input {
+    background: #141414; border: 1px solid #1e1e1e;
+    border-radius: 999px; color: #fff;
+    font-family: inherit; font-size: 11px;
+    padding: 6px 14px; outline: none;
+    transition: .3s ease; margin-left: 6px;
 }
-.options select,
-.options input {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #333;
-    color: #fff;
-    font-family: inherit;
-    font-size: 12px;
-    padding: 4px 0;
-    outline: none;
-    letter-spacing: 2px;
-}
-.options select option { background: #111; color: #fff; }
-.options select:focus,
-.options input:focus { border-bottom-color: #fff; }
+.options select { padding-right: 26px; }
+.options select:focus, .options input:focus { border-color: #fff; }
+.options select option { background: #141414; color: #fff; }
 
-/* =========================
-   PROGRESS / LOADING BAR
-========================= */
-.loader-bar {
+/* =============================
+   ОГРОМНЫЙ ЗАПРОС — СПРАВА
+   ============================= */
+.big-query {
     display: none;
-    max-width: 1200px;
-    margin: 0 auto 30px;
-    height: 2px;
-    background: #111;
-    overflow: hidden;
+    width: 100%;
+    max-width: 1400px;
+    margin: 30px auto 0;
+    padding: 0 20px;
+    text-align: right;
+    flex-shrink: 0;
+}
+.big-query.active {
+    display: block;
+    animation: queryRise 1s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes queryRise {
+    0% {
+        opacity: 0;
+        transform: translateY(80px);
+        filter: blur(12px);
+    }
+    60% {
+        opacity: 1;
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.big-query .value {
+    font-size: clamp(56px, 12vw, 190px);
+    font-weight: 900;
+    letter-spacing: -6px;
+    line-height: 1;
+    color: #fff;
+    word-break: break-all;
+    display: inline-block;
     position: relative;
 }
-.loader-bar.active { display: block; }
-.loader-bar::before {
-    content: "";
-    position: absolute;
-    top: 0; left: -40%;
-    width: 40%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, #fff, transparent);
-    animation: barMove 1.2s linear infinite;
-}
-@keyframes barMove {
-    to { left: 120%; }
+
+.big-query .count {
+    margin-top: 28px;
+    font-size: 14px;
+    color: #666;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-align: right;
 }
 
-/* =========================
-   STATUS TEXT
-========================= */
+/* STATUS */
 .status-text {
-    text-align: center;
-    color: #666;
-    font-size: 13px;
-    letter-spacing: 4px;
-    padding: 40px 0;
+    text-align: center; color: #666; font-size: 12px;
+    letter-spacing: 5px; padding: 40px 0;
     text-transform: uppercase;
     animation: pulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
 }
 @keyframes pulse {
-    0%, 100% { opacity: .5; }
-    50% { opacity: 1; }
+    0%, 100% { opacity: .4; }
+    50%      { opacity: 1; }
 }
-.status-text.error {
-    color: #ff5555;
-    animation: none;
-}
+.status-text.error { color: #ff5555; animation: none; }
 
-/* =========================
-   RESULTS
-========================= */
+/* =============================
+   РЕЗУЛЬТАТЫ — ВЫЕЗЖАЮТ ПРИ СКРОЛЛЕ
+   ============================= */
 .results {
-    flex: 1;
-    overflow-y: auto;
-    max-width: 1200px;
     width: 100%;
+    max-width: 1400px;
     margin: 0 auto;
-    padding-right: 20px;
-    scrollbar-width: thin;
-    scrollbar-color: #333 #050505;
-}
-.results::-webkit-scrollbar { width: 8px; }
-.results::-webkit-scrollbar-track { background: #050505; }
-.results::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
-.results::-webkit-scrollbar-thumb:hover { background: #333; }
-
-.result {
-    border-left: 2px solid #222;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-    background: #0a0a0a;
-    animation: resultIn .5s ease backwards;
-    transition: .3s ease;
-    word-break: break-all;
-}
-.result:hover {
-    border-left-color: #fff;
-    background: #111;
-    transform: translateX(4px);
-}
-@keyframes resultIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.result .source {
-    font-size: 10px;
-    color: #666;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-}
-.result .raw {
-    font-size: 13px;
-    color: #ddd;
-    white-space: pre-wrap;
-    line-height: 1.5;
+    padding: 60px 20px 120px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    align-content: start;
 }
 
-/* staggered delay */
-.result:nth-child(1)  { animation-delay: .00s; }
-.result:nth-child(2)  { animation-delay: .04s; }
-.result:nth-child(3)  { animation-delay: .08s; }
-.result:nth-child(4)  { animation-delay: .12s; }
-.result:nth-child(5)  { animation-delay: .16s; }
-.result:nth-child(6)  { animation-delay: .20s; }
-.result:nth-child(7)  { animation-delay: .24s; }
-.result:nth-child(8)  { animation-delay: .28s; }
-.result:nth-child(9)  { animation-delay: .32s; }
-.result:nth-child(10) { animation-delay: .36s; }
+.card {
+    background: #141414;
+    border: 1px solid #1e1e1e;
+    border-radius: 18px;
+    padding: 16px 18px;
+    word-break: break-word;
+    overflow: hidden;
+    position: relative;
 
-/* =========================
-   STATS
-========================= */
-.stats {
-    display: none;
-    max-width: 1200px;
-    margin: 0 auto 20px;
-    font-size: 11px;
-    color: #555;
+    opacity: 0;
+    transform: translateY(60px);
+    transition:
+        opacity .8s cubic-bezier(.2,.8,.2,1),
+        transform .9s cubic-bezier(.2,.8,.2,1),
+        border-color .3s ease,
+        background .3s ease,
+        box-shadow .3s ease;
+}
+.card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.card:hover {
+    border-color: #444;
+    background: #1a1a1a;
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0,0,0,.6);
+}
+
+.card .source {
+    display: inline-block;
+    font-size: 9px;
+    color: #777;
     letter-spacing: 2px;
-    line-height: 1.8;
+    text-transform: uppercase;
+    background: #1e1e1e;
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-bottom: 12px;
+    font-weight: 600;
 }
-.stats.active { display: block; }
-.stats b { color: #fff; }
 
-/* =========================
-   MOBILE
-========================= */
+.card .fields {
+    display: flex; flex-direction: column; gap: 6px;
+}
+.card .field-row {
+    display: flex; justify-content: space-between; gap: 10px;
+    padding: 6px 10px;
+    background: #0f0f0f;
+    border-radius: 8px;
+    border: 1px solid #1a1a1a;
+}
+.card .field-name {
+    font-size: 10px; color: #777;
+    text-transform: uppercase; letter-spacing: 1px;
+    flex-shrink: 0; font-weight: 600;
+}
+.card .field-value {
+    font-size: 12px; color: #eee;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    text-align: right; word-break: break-all;
+}
+
+.card .raw {
+    font-size: 12px; color: #ccc;
+    white-space: pre-wrap; line-height: 1.5;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+}
+
+.empty {
+    grid-column: 1 / -1;
+    text-align: center; color: #444;
+    font-size: 13px; letter-spacing: 4px;
+    padding: 60px 0; text-transform: uppercase;
+}
+
+/* MOBILE */
 @media (max-width: 700px) {
-    .overlay { padding: 20px; }
-    .search-wrap { flex-direction: column; gap: 10px; }
-    .search-input { font-size: 24px; }
-    .search-btn { width: 100%; padding: 14px 20px; }
-    .options { gap: 20px; font-size: 10px; }
+    .overlay { padding: 16px 16px 40px; }
+    .search-wrap { flex-direction: column; }
+    .search-btn { padding: 12px; width: 100%; }
+    .big-query { text-align: right; padding: 0 8px; }
+    .big-query .value {
+        font-size: clamp(40px, 14vw, 90px);
+        letter-spacing: -3px;
+    }
+    .big-query .count { font-size: 11px; letter-spacing: 2px; }
+    .results { grid-template-columns: 1fr; padding: 30px 8px 80px; }
 }
 </style>
 </head>
@@ -303,8 +266,8 @@ body {
     </div>
 
     <div class="search-wrap">
-        <input type="text" id="q" class="search-input" placeholder="ВВЕДИ ЗАПРОС..." autofocus autocomplete="off">
-        <button id="go" class="search-btn">ПРОБИТЬ</button>
+        <input type="text" id="q" class="search-input" placeholder="Введите запрос..." autofocus autocomplete="off">
+        <button id="go" class="search-btn">Пробить</button>
     </div>
 
     <div class="options">
@@ -347,8 +310,11 @@ body {
         </label>
     </div>
 
-    <div class="loader-bar" id="loader-bar"></div>
-    <div class="stats" id="stats"></div>
+    <!-- ОГРОМНЫЙ ЗАПРОС СПРАВА -->
+    <div class="big-query" id="big-query">
+        <div class="value" id="big-query-value">—</div>
+        <div class="count" id="big-query-count"></div>
+    </div>
 
     <div class="results" id="results"></div>
 
@@ -361,12 +327,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDTbyu1HfyZ1ETvidxnexV6pON0gDO-8XQ",
-  authDomain: "databaseee-324e7.firebaseapp.com",
-  projectId: "databaseee-324e7",
-  storageBucket: "databaseee-324e7.firebasestorage.app",
-  messagingSenderId: "837279132183",
-  appId: "1:837279132183:web:5583196f539916dcf14a52"
+    apiKey: "AIzaSyDTbyu1HfyZ1ETvidxnexV6pON0gDO-8XQ",
+    authDomain: "databaseee-324e7.firebaseapp.com",
+    projectId: "databaseee-324e7",
+    storageBucket: "databaseee-324e7.firebasestorage.app",
+    messagingSenderId: "837279132183",
+    appId: "1:837279132183:web:5583196f539916dcf14a52"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -376,23 +342,38 @@ const qInput    = document.getElementById('q');
 const fieldSel  = document.getElementById('field');
 const timeoutIn = document.getElementById('timeout');
 const goBtn     = document.getElementById('go');
-const stats     = document.getElementById('stats');
 const results   = document.getElementById('results');
-const loaderBar = document.getElementById('loader-bar');
+const bigQuery  = document.getElementById('big-query');
+const bigQueryValue = document.getElementById('big-query-value');
+const bigQueryCount = document.getElementById('big-query-count');
 
 let currentUnsub = null;
+
+const cardObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            cardObserver.unobserve(entry.target);
+        }
+    });
+}, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -40px 0px'
+});
+
+function observeCard(card) {
+    cardObserver.observe(card);
+}
 
 async function doSearch() {
     const q = qInput.value.trim();
     if (!q) return;
-
     if (currentUnsub) { currentUnsub(); currentUnsub = null; }
 
     goBtn.disabled = true;
-    goBtn.textContent = 'ИДЁТ ПРОБИВ...';
-    stats.classList.remove('active');
-    results.innerHTML = '<div class="status-text">ОТПРАВКА ЗАПРОСА НА СЕРВЕР...</div>';
-    loaderBar.classList.add('active');
+    goBtn.textContent = 'Идёт пробив...';
+    bigQuery.classList.remove('active');
+    results.innerHTML = '<div class="status-text">Отправка запроса...</div>';
 
     const field = fieldSel.value;
     let timeout = parseInt(timeoutIn.value) || 20;
@@ -408,66 +389,87 @@ async function doSearch() {
             createdAt: serverTimestamp(),
         });
 
-        const t0 = performance.now();
-
         currentUnsub = onSnapshot(doc(db, "requests", reqRef.id), (snap) => {
             const d = snap.data();
             if (!d) return;
 
             if (d.status === "pending") {
-                results.innerHTML = '<div class="status-text">ЗАПРОС В ОЧЕРЕДИ...</div>';
+                results.innerHTML = '<div class="status-text">Запрос в очереди...</div>';
                 return;
             }
             if (d.status === "processing") {
-                results.innerHTML = '<div class="status-text">ПОИСК ПО БАЗАМ...</div>';
+                results.innerHTML = '<div class="status-text">Поиск по базам...</div>';
                 return;
             }
             if (d.status === "error") {
-                loaderBar.classList.remove('active');
-                results.innerHTML = `<div class="status-text error">ОШИБКА: ${escapeHtml(d.error || "неизвестно")}</div>`;
+                results.innerHTML = `<div class="status-text error">Ошибка: ${escapeHtml(d.error || "неизвестно")}</div>`;
                 goBtn.disabled = false;
-                goBtn.textContent = 'ПРОБИТЬ';
+                goBtn.textContent = 'Пробить';
                 if (currentUnsub) { currentUnsub(); currentUnsub = null; }
                 return;
             }
             if (d.status === "done") {
-                loaderBar.classList.remove('active');
-                const dt = Math.round(performance.now() - t0);
                 const data = d.result || {};
                 const items = data.results || [];
 
-                stats.classList.add('active');
-                stats.innerHTML = `
-                    ЗАПРОС: <b>${escapeHtml(q)}</b> &nbsp;|&nbsp; ПОЛЕ: <b>${field || 'ВСЕ'}</b> &nbsp;|&nbsp; ТАЙМАУТ: <b>${timeout}s</b><br>
-                    БАЗ: <b>${data.total_dbs || 0}</b> &nbsp;|&nbsp; С СОВПАДЕНИЯМИ: <b>${data.ok || 0}</b> &nbsp;|&nbsp; ПУСТЫХ: <b>${data.empty || 0}</b> &nbsp;|&nbsp; ПРОПУЩЕНО: <b>${data.timeout || 0}</b> &nbsp;|&nbsp; ОШИБОК: <b>${data.errors || 0}</b><br>
-                    НАЙДЕНО: <b>${items.length}</b> &nbsp;|&nbsp; СЕРВЕР: <b>${data.time || 0}s</b> &nbsp;|&nbsp; КЛИЕНТ: <b>${dt}ms</b>
-                `;
+                bigQueryValue.textContent = q;
+                if (items.length > 0) {
+                    bigQueryCount.textContent = `Найдено: ${items.length} | Баз: ${data.ok || 0} из ${data.total_dbs || 0} | Время: ${data.time || 0}s`;
+                } else {
+                    bigQueryCount.textContent = `Ничего не найдено | Баз проверено: ${data.total_dbs || 0} | Время: ${data.time || 0}s`;
+                }
+
+                bigQuery.classList.remove('active');
+                void bigQuery.offsetWidth;
+                bigQuery.classList.add('active');
+
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
 
                 if (!items.length) {
-                    results.innerHTML = '<div class="status-text" style="animation:none;opacity:.5;">НИЧЕГО НЕ НАЙДЕНО</div>';
+                    results.innerHTML = '<div class="empty">Ничего не найдено</div>';
                 } else {
                     results.innerHTML = '';
                     for (const r of items) {
-                        const div = document.createElement('div');
-                        div.className = 'result';
-                        div.innerHTML = `
-                            <div class="source">${escapeHtml(r.source)}</div>
-                            <div class="raw">${escapeHtml(r.raw)}</div>
-                        `;
-                        results.appendChild(div);
+                        const card = document.createElement('div');
+                        card.className = 'card';
+
+                        if (r.fields && r.fields.length) {
+                            let fieldsHtml = '';
+                            for (const f of r.fields) {
+                                fieldsHtml += `
+                                    <div class="field-row">
+                                        <div class="field-name">${escapeHtml(f.name)}</div>
+                                        <div class="field-value">${escapeHtml(f.value)}</div>
+                                    </div>
+                                `;
+                            }
+                            card.innerHTML = `
+                                <div class="source">${escapeHtml(r.source)}</div>
+                                <div class="fields">${fieldsHtml}</div>
+                            `;
+                        } else {
+                            card.innerHTML = `
+                                <div class="source">${escapeHtml(r.source)}</div>
+                                <div class="raw">${escapeHtml(r.raw)}</div>
+                            `;
+                        }
+
+                        results.appendChild(card);
+                        observeCard(card);
                     }
                 }
 
                 goBtn.disabled = false;
-                goBtn.textContent = 'ПРОБИТЬ';
+                goBtn.textContent = 'Пробить';
                 if (currentUnsub) { currentUnsub(); currentUnsub = null; }
             }
         });
     } catch (e) {
-        loaderBar.classList.remove('active');
-        results.innerHTML = `<div class="status-text error">ОШИБКА: ${escapeHtml(e.message)}</div>`;
+        results.innerHTML = `<div class="status-text error">Ошибка: ${escapeHtml(e.message)}</div>`;
         goBtn.disabled = false;
-        goBtn.textContent = 'ПРОБИТЬ';
+        goBtn.textContent = 'Пробить';
     }
 }
 
