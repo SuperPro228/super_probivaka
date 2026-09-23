@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ПРОБИВ — Поиск</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    background: #050505;
+    color: #fff;
+    font-family: 'Courier New', Consolas, monospace;
+    overflow: hidden;
+}
+
+/* =========================
+   FULLSCREEN OVERLAY
+========================= */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: #050505;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 60px;
+    opacity: 0;
+    animation: overlayIn .7s ease forwards;
+}
+@keyframes overlayIn { to { opacity: 1; } }
+
+/* =========================
+   TOP BAR
+========================= */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.back-btn {
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 4px;
+    padding: 10px 20px;
+    border: 1px solid #333;
+    transition: .3s ease;
+    text-transform: uppercase;
+}
+.back-btn:hover {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+    letter-spacing: 6px;
+}
+.title {
+    font-size: 14px;
+    letter-spacing: 8px;
+    color: #666;
+    text-transform: uppercase;
+}
+
+/* =========================
+   SEARCH INPUT
+========================= */
+.search-wrap {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+.search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #222;
+    color: #fff;
+    font-family: inherit;
+    font-size: 42px;
+    padding: 18px 0;
+    outline: none;
+    letter-spacing: 2px;
+    transition: border-color .3s ease;
+}
+.search-input::placeholder {
+    color: #333;
+    font-weight: 300;
+    letter-spacing: 3px;
+}
+.search-input:focus {
+    border-bottom-color: #fff;
+}
+
+.search-btn {
+    background: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    padding: 14px 40px;
+    cursor: pointer;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    transition: .3s ease;
+    position: relative;
+    overflow: hidden;
+    align-self: flex-end;
+}
+.search-btn:hover {
+    background: #fff;
+    color: #000;
+    letter-spacing: 10px;
+}
+.search-btn:disabled {
+    color: #666;
+    border-color: #333;
+    cursor: wait;
+}
+
+/* =========================
+   OPTIONS ROW
+========================= */
+.options {
+    display: flex;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #666;
+}
+.options label {
+    text-transform: uppercase;
+}
+.options select,
+.options input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #333;
+    color: #fff;
+    font-family: inherit;
+    font-size: 12px;
+    padding: 4px 0;
+    outline: none;
+    letter-spacing: 2px;
+}
+.options select option { background: #111; color: #fff; }
+.options select:focus,
+.options input:focus { border-bottom-color: #fff; }
+
+/* =========================
+   PROGRESS / LOADING BAR
+========================= */
+.loader-bar {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    height: 2px;
+    background: #111;
+    overflow: hidden;
+    position: relative;
+}
+.loader-bar.active { display: block; }
+.loader-bar::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -40%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    animation: barMove 1.2s linear infinite;
+}
+@keyframes barMove {
+    to { left: 120%; }
+}
+
+/* =========================
+   STATUS TEXT
+========================= */
+.status-text {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    letter-spacing: 4px;
+    padding: 40px 0;
+    text-transform: uppercase;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: .5; }
+    50% { opacity: 1; }
+}
+.status-text.error {
+    color: #ff5555;
+    animation: none;
+}
+
+/* =========================
+   RESULTS
+========================= */
+.results {
+    flex: 1;
+    overflow-y: auto;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding-right: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: #333 #050505;
+}
+.results::-webkit-scrollbar { width: 8px; }
+.results::-webkit-scrollbar-track { background: #050505; }
+.results::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
+.results::-webkit-scrollbar-thumb:hover { background: #333; }
+
+.result {
+    border-left: 2px solid #222;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    background: #0a0a0a;
+    animation: resultIn .5s ease backwards;
+    transition: .3s ease;
+    word-break: break-all;
+}
+.result:hover {
+    border-left-color: #fff;
+    background: #111;
+    transform: translateX(4px);
+}
+@keyframes resultIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.result .source {
+    font-size: 10px;
+    color: #666;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.result .raw {
+    font-size: 13px;
+    color: #ddd;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+/* staggered delay */
+.result:nth-child(1)  { animation-delay: .00s; }
+.result:nth-child(2)  { animation-delay: .04s; }
+.result:nth-child(3)  { animation-delay: .08s; }
+.result:nth-child(4)  { animation-delay: .12s; }
+.result:nth-child(5)  { animation-delay: .16s; }
+.result:nth-child(6)  { animation-delay: .20s; }
+.result:nth-child(7)  { animation-delay: .24s; }
+.result:nth-child(8)  { animation-delay: .28s; }
+.result:nth-child(9)  { animation-delay: .32s; }
+.result:nth-child(10) { animation-delay: .36s; }
+
+/* =========================
+   STATS
+========================= */
+.stats {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto 20px;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 2px;
+    line-height: 1.8;
+}
+.stats.active { display: block; }
+.stats b { color: #fff; }
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 700px) {
+    .overlay { padding: 20px; }
+    .search-wrap { flex-direction: column; gap: 10px; }
+    .search-input { font-size: 24px; }
+    .search-btn { width: 100%; padding: 14px 20px; }
+    .options { gap: 20px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="overlay">
+
+    <div class="top-bar">
+        <a href="index.html" class="back-btn">← Назад</a>
+        <div class="title">PETYA / ПРОБИВ</div>
+    </div>
+
+    <div class="search-wrap">
+        <input type="text" id="q" class="search-input" placeholder="ВВЕДИ ЗАПРОС..." autofocus autocomplete="off">
+        <button id="go" class="search-btn">ПРОБИТЬ</button>
+    </div>
+
+    <div class="options">
+        <label>Поле:
+            <select id="field">
+                <option value="">ВСЕ (FTS)</option>
+                <option value="inn">ИНН</option>
+                <option value="phone">ТЕЛЕФОН</option>
+                <option value="telegram_id">TELEGRAM ID</option>
+                <option value="snils">СНИЛС</option>
+                <option value="passport">ПАСПОРТ</option>
+                <option value="fio">ФИО</option>
+                <option value="surname">ФАМИЛИЯ</option>
+                <option value="name">ИМЯ</option>
+                <option value="middle_name">ОТЧЕСТВО</option>
+                <option value="username">USERNAME</option>
+                <option value="nickname">NICKNAME</option>
+                <option value="dob">ДАТА РОЖДЕНИЯ</option>
+                <option value="birth_date">BIRTH_DATE</option>
+                <option value="birthday">BIRTHDAY</option>
+                <option value="address">АДРЕС</option>
+                <option value="email">EMAIL</option>
+                <option value="polis">ПОЛИС</option>
+                <option value="policy">POLICY</option>
+                <option value="policy_num">POLICY_NUM</option>
+                <option value="doc">DOC</option>
+                <option value="doc_number">DOC_NUMBER</option>
+                <option value="mobile">МОБИЛЬНЫЙ</option>
+                <option value="full_name">FULL_NAME</option>
+                <option value="yandex_id">YANDEX ID</option>
+                <option value="msisdn">MSISDN</option>
+                <option value="uid">UID</option>
+                <option value="id">ID</option>
+                <option value="login">LOGIN</option>
+            </select>
+        </label>
+
+        <label>Таймаут:
+            <input type="number" id="timeout" value="20" min="1" max="300" style="width:60px; text-align:center;">
+        </label>
+    </div>
+
+    <div class="loader-bar" id="loader-bar"></div>
+    <div class="stats" id="stats"></div>
+
+    <div class="results" id="results"></div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDTbyu1HfyZ1ETvidxnexV6pON0gDO-8XQ",
+  authDomain: "databaseee-324e7.firebaseapp.com",
+  projectId: "databaseee-324e7",
+  storageBucket: "databaseee-324e7.firebasestorage.app",
+  messagingSenderId: "837279132183",
+  appId: "1:837279132183:web:5583196f539916dcf14a52"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const qInput    = document.getElementById('q');
+const fieldSel  = document.getElementById('field');
+const timeoutIn = document.getElementById('timeout');
+const goBtn     = document.getElementById('go');
+const stats     = document.getElementById('stats');
+const results   = document.getElementById('results');
+const loaderBar = document.getElementById('loader-bar');
+
+let currentUnsub = null;
+
+async function doSearch() {
+    const q = qInput.value.trim();
+    if (!q) return;
+
+    if (currentUnsub) { currentUnsub(); currentUnsub = null; }
+
+    goBtn.disabled = true;
+    goBtn.textContent = 'ИДЁТ ПРОБИВ...';
+    stats.classList.remove('active');
+    results.innerHTML = '<div class="status-text">ОТПРАВКА ЗАПРОСА НА СЕРВЕР...</div>';
+    loaderBar.classList.add('active');
+
+    const field = fieldSel.value;
+    let timeout = parseInt(timeoutIn.value) || 20;
+    if (timeout < 1) timeout = 1;
+    if (timeout > 300) timeout = 300;
+
+    try {
+        const reqRef = await addDoc(collection(db, "requests"), {
+            query: q,
+            field: field,
+            timeout: timeout,
+            status: "pending",
+            createdAt: serverTimestamp(),
+        });
+
+        const t0 = performance.now();
+
+        currentUnsub = onSnapshot(doc(db, "requests", reqRef.id), (snap) => {
+            const d = snap.data();
+            if (!d) return;
+
+            if (d.status === "pending") {
+                results.innerHTML = '<div class="status-text">ЗАПРОС В ОЧЕРЕДИ...</div>';
+                return;
+            }
+            if (d.status === "processing") {
+                results.innerHTML = '<div class="status-text">ПОИСК ПО БАЗАМ...</div>';
+                return;
+            }
+            if (d.status === "error") {
+                loaderBar.classList.remove('active');
+                results.innerHTML = `<div class="status-text error">ОШИБКА: ${escapeHtml(d.error || "неизвестно")}</div>`;
+                goBtn.disabled = false;
+                goBtn.textContent = 'ПРОБИТЬ';
+                if (currentUnsub) { currentUnsub(); currentUnsub = null; }
+                return;
+            }
+            if (d.status === "done") {
+                loaderBar.classList.remove('active');
+                const dt = Math.round(performance.now() - t0);
+                const data = d.result || {};
+                const items = data.results || [];
+
+                stats.classList.add('active');
+                stats.innerHTML = `
+                    ЗАПРОС: <b>${escapeHtml(q)}</b> &nbsp;|&nbsp; ПОЛЕ: <b>${field || 'ВСЕ'}</b> &nbsp;|&nbsp; ТАЙМАУТ: <b>${timeout}s</b><br>
+                    БАЗ: <b>${data.total_dbs || 0}</b> &nbsp;|&nbsp; С СОВПАДЕНИЯМИ: <b>${data.ok || 0}</b> &nbsp;|&nbsp; ПУСТЫХ: <b>${data.empty || 0}</b> &nbsp;|&nbsp; ПРОПУЩЕНО: <b>${data.timeout || 0}</b> &nbsp;|&nbsp; ОШИБОК: <b>${data.errors || 0}</b><br>
+                    НАЙДЕНО: <b>${items.length}</b> &nbsp;|&nbsp; СЕРВЕР: <b>${data.time || 0}s</b> &nbsp;|&nbsp; КЛИЕНТ: <b>${dt}ms</b>
+                `;
+
+                if (!items.length) {
+                    results.innerHTML = '<div class="status-text" style="animation:none;opacity:.5;">НИЧЕГО НЕ НАЙДЕНО</div>';
+                } else {
+                    results.innerHTML = '';
+                    for (const r of items) {
+                        const div = document.createElement('div');
+                        div.className = 'result';
+                        div.innerHTML = `
+                            <div class="source">${escapeHtml(r.source)}</div>
+                            <div class="raw">${escapeHtml(r.raw)}</div>
+                        `;
+                        results.appendChild(div);
+                    }
+                }
+
+                goBtn.disabled = false;
+                goBtn.textContent = 'ПРОБИТЬ';
+                if (currentUnsub) { currentUnsub(); currentUnsub = null; }
+            }
+        });
+    } catch (e) {
+        loaderBar.classList.remove('active');
+        results.innerHTML = `<div class="status-text error">ОШИБКА: ${escapeHtml(e.message)}</div>`;
+        goBtn.disabled = false;
+        goBtn.textContent = 'ПРОБИТЬ';
+    }
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+goBtn.addEventListener('click', doSearch);
+qInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>

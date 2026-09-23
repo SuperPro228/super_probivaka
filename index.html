@@ -2,293 +2,359 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Поиск по базам</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PETYA</title>
 <style>
-  body {
-    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    background: #0f1115;
-    color: #e6e6e6;
-    margin: 0;
-    padding: 20px;
-  }
-  h1 { color: #4cafef; margin-top: 0; }
-  .controls {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    max-width: 900px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .search-box {
-    display: flex;
-    gap: 10px;
-    flex: 1;
-    min-width: 400px;
-  }
-  input[type="text"] {
-    flex: 1;
-    padding: 14px;
-    font-size: 18px;
-    background: #1b1f26;
-    border: 1px solid #2a2f38;
-    border-radius: 8px;
-    color: #e6e6e6;
-    outline: none;
-  }
-  input[type="text"]:focus { border-color: #4cafef; }
-  input[type="number"] {
-    width: 80px;
-    padding: 14px 10px;
-    font-size: 16px;
-    background: #1b1f26;
-    border: 1px solid #2a2f38;
-    border-radius: 8px;
-    color: #e6e6e6;
-    outline: none;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: #000;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+}
+
+/* =========================
+   LOADER
+========================= */
+.loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 1.2s ease, visibility 1.2s ease;
+}
+.loader.hide { opacity: 0; visibility: hidden; }
+.loader-title {
+    font-size: clamp(80px, 18vw, 260px);
+    font-weight: 900; letter-spacing: -15px;
+    animation: loaderIn 1.5s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes loaderIn {
+    from { opacity: 0; transform: scale(1.2); filter: blur(20px); }
+    to   { opacity: 1; transform: scale(1);   filter: blur(0); }
+}
+
+/* =========================
+   NAV
+========================= */
+nav {
+    position: fixed; top: 0; left: 0;
+    width: 100%; padding: 30px 45px;
+    display: flex; justify-content: space-between;
+    z-index: 100; mix-blend-mode: difference;
+}
+.logo { font-size: 20px; font-weight: 800; letter-spacing: 6px; }
+.nav-info { font-size: 10px; letter-spacing: 4px; }
+
+/* =========================
+   PRESENTATION
+========================= */
+.presentation { position: relative; }
+.scene {
+    height: 100vh; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+
+/* =========================
+   BACKGROUND
+========================= */
+.scene-image {
+    position: absolute; inset: -5%;
+    width: 110%; height: 110%;
+    object-fit: cover;
+    opacity: 0; transform: scale(1.12);
+    filter: brightness(.42) contrast(1.05);
+    transition:
+        opacity 1.4s cubic-bezier(.2,.7,.2,1),
+        transform 2s cubic-bezier(.2,.7,.2,1),
+        filter 1.4s ease;
+}
+.scene.active .scene-image {
+    opacity: 1; transform: scale(1);
+    filter: brightness(.48) contrast(1.05);
+}
+.scene::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+        rgba(0,0,0,.5),
+        rgba(0,0,0,.15) 45%,
+        rgba(0,0,0,.7));
+    z-index: 1;
+}
+
+/* =========================
+   TEXT
+========================= */
+.scene-content {
+    position: relative; z-index: 3;
+    width: 90%; max-width: 1300px;
     text-align: center;
-  }
-  input[type="number"]:focus { border-color: #4cafef; }
-  button {
-    padding: 14px 24px;
-    font-size: 16px;
-    background: #4cafef;
-    color: #0f1115;
-    border: none;
-    border-radius: 8px;
+    opacity: 0; transform: translateY(80px) scale(.96);
+    transition:
+        opacity 1s ease .15s,
+        transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+.scene.active .scene-content {
+    opacity: 1; transform: translateY(0) scale(1);
+}
+.scene-number {
+    font-size: 10px; letter-spacing: 7px; color: #aaa;
+    margin-bottom: 35px;
+}
+.scene-title {
+    font-size: clamp(65px, 12vw, 190px);
+    font-weight: 800; line-height: .82; letter-spacing: -9px;
+    text-transform: uppercase;
+    text-shadow: 0 10px 60px rgba(0,0,0,.5);
+}
+.scene-subtitle {
+    margin-top: 45px;
+    font-size: clamp(20px, 3vw, 42px);
+    font-weight: 300; letter-spacing: -1px;
+}
+.scene-description {
+    max-width: 600px;
+    margin: 25px auto 0;
+    color: #bbb;
+    font-size: 14px; line-height: 1.7;
+}
+
+/* =========================
+   FIRST SCENE
+========================= */
+.scene.first { background: #050505; }
+.first .scene-title { font-size: clamp(90px, 18vw, 280px); }
+
+/* =========================
+   BREAKTHROUGH BUTTON
+========================= */
+.breakthrough-btn {
+    display: inline-block;
+    margin-top: 45px;
+    padding: 20px 70px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 12px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #fff;
+    border: 2px solid #fff;
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+    transition:
+        color .4s ease,
+        letter-spacing .4s ease,
+        transform .3s ease;
     cursor: pointer;
-    font-weight: 600;
-  }
-  button:hover { background: #6bc2ff; }
-  button:disabled { background: #2a2f38; color: #777; cursor: wait; }
-  .field-picker {
-    margin-bottom: 20px;
-    max-width: 900px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .field-picker label {
-    color: #999;
-  }
-  .field-picker select {
-    padding: 10px;
-    background: #1b1f26;
-    color: #e6e6e6;
-    border: 1px solid #2a2f38;
-    border-radius: 6px;
-    font-size: 14px;
-    min-width: 200px;
-  }
-  .stats {
-    padding: 12px 16px;
-    background: #1b1f26;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-family: monospace;
-    font-size: 14px;
-    color: #999;
-    max-width: 900px;
-  }
-  .stats b { color: #4cafef; }
-  .result {
-    background: #1b1f26;
-    border-left: 4px solid #4cafef;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    word-break: break-all;
-    max-width: 900px;
-  }
-  .result .source {
-    color: #4cafef;
-    font-size: 12px;
-    margin-bottom: 6px;
-    font-family: monospace;
-  }
-  .result .raw {
-    font-family: monospace;
-    font-size: 14px;
-    white-space: pre-wrap;
-  }
-  .empty { color: #777; text-align: center; padding: 40px; }
-  .error { color: #ff6b6b; padding: 20px; }
-  .status { color: #ffaa33; padding: 10px 0; }
+    z-index: 5;
+}
+.breakthrough-btn::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: #fff;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .5s cubic-bezier(.2,.8,.2,1);
+    z-index: -1;
+}
+.breakthrough-btn:hover {
+    color: #000;
+    letter-spacing: 16px;
+    transform: translateY(-2px);
+}
+.breakthrough-btn:hover::before { transform: scaleX(1); }
+.breakthrough-btn:active { transform: translateY(0); }
+
+/* =========================
+   SCROLL INDICATOR
+========================= */
+.scroll-indicator {
+    position: absolute; bottom: 35px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    color: #aaa;
+    font-size: 9px; letter-spacing: 5px;
+    animation: scrollDown 2s infinite;
+}
+@keyframes scrollDown {
+    50% { transform: translateX(-50%) translateY(8px); opacity: .3; }
+}
+
+/* =========================
+   PROGRESS
+========================= */
+.progress {
+    position: fixed; right: 35px; top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.progress-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%; background: #555;
+    transition: .4s ease;
+}
+.progress-dot.active {
+    background: white; transform: scale(2);
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media(max-width: 700px) {
+    nav { padding: 22px; }
+    .nav-info { display: none; }
+    .scene-title { letter-spacing: -5px; }
+    .scene-subtitle { margin-top: 30px; }
+    .scene-description { font-size: 13px; padding: 0 15px; }
+    .progress { right: 15px; }
+    .breakthrough-btn {
+        padding: 16px 45px;
+        font-size: 14px;
+        letter-spacing: 8px;
+        margin-top: 35px;
+    }
+    .breakthrough-btn:hover { letter-spacing: 10px; }
+}
 </style>
 </head>
 <body>
-  <h1>🔍 Поиск по базам</h1>
 
-  <div class="field-picker">
-    <label>Поле:</label>
-    <select id="field">
-      <option value="">везде (FTS)</option>
-      <option value="inn">inn</option>
-      <option value="phone">phone</option>
-      <option value="telegram_id">telegram_id</option>
-      <option value="snils">snils</option>
-      <option value="passport">passport</option>
-      <option value="fio">fio</option>
-      <option value="surname">surname</option>
-      <option value="name">name</option>
-      <option value="middle_name">middle_name</option>
-      <option value="username">username</option>
-      <option value="nickname">nickname</option>
-      <option value="dob">dob</option>
-      <option value="birth_date">birth_date</option>
-      <option value="birthday">birthday</option>
-      <option value="address">address</option>
-      <option value="email">email</option>
-      <option value="polis">polis</option>
-      <option value="policy">policy</option>
-      <option value="policy_num">policy_num</option>
-      <option value="doc">doc</option>
-      <option value="doc_number">doc_number</option>
-      <option value="mobile">mobile</option>
-      <option value="full_name">full_name</option>
-      <option value="yandex_id">yandex_id</option>
-      <option value="msisdn">msisdn</option>
-      <option value="uid">uid</option>
-      <option value="id">id</option>
-      <option value="login">login</option>
-    </select>
+<div class="loader" id="loader">
+    <div class="loader-title">PETYA</div>
+</div>
 
-    <label>Таймаут базы (сек):</label>
-    <input type="number" id="timeout" value="20" min="1" max="300">
-  </div>
+<nav>
+    <div class="logo">PETYA</div>
+    <div class="nav-info">DIGITAL INTELLIGENCE</div>
+</nav>
 
-  <div class="controls">
-    <div class="search-box">
-      <input type="text" id="q" placeholder="Введите номер, ФИО, ИНН..." autofocus>
-    </div>
-    <button id="go">Искать</button>
-  </div>
+<div class="progress" id="progress"></div>
 
-  <div class="stats" id="stats" style="display:none;"></div>
-  <div id="results"></div>
+<main class="presentation" id="presentation">
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    <section class="scene first">
+        <div class="scene-content">
+            <div class="scene-number">PETYA / 00</div>
+            <div class="scene-title">PETYA</div>
+            <div class="scene-subtitle">ЦИФРОВОЙ ИНТЕЛЛЕКТ</div>
+            <div class="scene-description">
+                Инструменты анализа открытой информации
+                и цифрового следа.
+            </div>
+            <a href="search.html" class="breakthrough-btn">ПРОБИВ</a>
+        </div>
+        <div class="scroll-indicator">SCROLL</div>
+    </section>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDTbyu1HfyZ1ETvidxnexV6pON0gDO-8XQ",
-  authDomain: "databaseee-324e7.firebaseapp.com",
-  projectId: "databaseee-324e7",
-  storageBucket: "databaseee-324e7.firebasestorage.app",
-  messagingSenderId: "837279132183",
-  appId: "1:837279132183:web:5583196f539916dcf14a52"
-};
+</main>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+<script>
+const scenes = [
+    { image: "1.png", title: "БАЗЫ<br>ДАННЫХ", subtitle: "ОГРОМНЫЙ ВЫБОР БАЗ ДАННЫХ",
+      description: "Анализ доступных источников и открытой информации в одном интерфейсе." },
+    { image: "2.png", title: "ПОИСК", subtitle: "ЕДИНАЯ ТОЧКА ДОСТУПА",
+      description: "Быстрый поиск по разрешённым и публичным источникам." },
+    { image: "3.png", title: "АНАЛИЗ", subtitle: "ИНФОРМАЦИЯ В ПОНЯТНОМ ВИДЕ",
+      description: "Структурирование результатов и визуальное представление информации." },
+    { image: "4.png", title: "СИСТЕМА", subtitle: "ВСЁ В ОДНОМ МЕСТЕ",
+      description: "Минималистичный интерфейс для работы с цифровой информацией." },
+    { image: "5.png", title: "ПРИВАТНОСТЬ", subtitle: "КОНТРОЛИРУЙ СВОЙ ЦИФРОВОЙ СЛЕД",
+      description: "Помогает понять, какая информация о вас доступна публично." }
+];
 
-const qInput = document.getElementById('q');
-const fieldSel = document.getElementById('field');
-const timeoutInput = document.getElementById('timeout');
-const goBtn = document.getElementById('go');
-const stats = document.getElementById('stats');
-const results = document.getElementById('results');
-
-let currentUnsub = null;
-
-async function doSearch() {
-  const q = qInput.value.trim();
-  if (!q) return;
-
-  if (currentUnsub) { currentUnsub(); currentUnsub = null; }
-
-  goBtn.disabled = true;
-  goBtn.textContent = 'Ищу...';
-  stats.style.display = 'none';
-  results.innerHTML = '<div class="status">Отправлен запрос на сервер...</div>';
-
-  const field = fieldSel.value;
-  let timeout = parseInt(timeoutInput.value) || 20;
-  if (timeout < 1) timeout = 1;
-  if (timeout > 300) timeout = 300;
-
-  try {
-    const reqRef = await addDoc(collection(db, "requests"), {
-      query: q,
-      field: field,
-      timeout: timeout,
-      status: "pending",
-      createdAt: serverTimestamp(),
-    });
-
-    const t0 = performance.now();
-
-    currentUnsub = onSnapshot(doc(db, "requests", reqRef.id), (snap) => {
-      const d = snap.data();
-      if (!d) return;
-
-      if (d.status === "pending") {
-        results.innerHTML = '<div class="status">Запрос в очереди...</div>';
-        return;
-      }
-      if (d.status === "processing") {
-        results.innerHTML = '<div class="status">Сервер обрабатывает запрос...</div>';
-        return;
-      }
-      if (d.status === "error") {
-        results.innerHTML = `<div class="error">Ошибка: ${d.error || "неизвестно"}</div>`;
-        goBtn.disabled = false;
-        goBtn.textContent = 'Искать';
-        if (currentUnsub) { currentUnsub(); currentUnsub = null; }
-        return;
-      }
-      if (d.status === "done") {
-        const dt = Math.round(performance.now() - t0);
-        const data = d.result || {};
-
-        stats.style.display = 'block';
-        stats.innerHTML = `
-          Запрос: <b>${escapeHtml(q)}</b> | Поле: <b>${field || 'все'}</b> | Таймаут: <b>${timeout}s</b><br>
-          Баз: <b>${data.total_dbs || 0}</b> | С совпадениями: <b>${data.ok || 0}</b> | Пустых: <b>${data.empty || 0}</b> | Пропущено: <b>${data.timeout || 0}</b> | Ошибок: <b>${data.errors || 0}</b><br>
-          Найдено: <b>${(data.results || []).length}</b> | Сервер: <b>${data.time || 0}s</b> | Клиент: <b>${dt}ms</b>
-        `;
-
-        const items = data.results || [];
-        if (!items.length) {
-          results.innerHTML = '<div class="empty">Ничего не найдено</div>';
-        } else {
-          results.innerHTML = '';
-          for (const r of items) {
-            const div = document.createElement('div');
-            div.className = 'result';
-            div.innerHTML = `
-              <div class="source">${escapeHtml(r.source)}</div>
-              <div class="raw">${escapeHtml(r.raw)}</div>
-            `;
-            results.appendChild(div);
-          }
-        }
-        goBtn.disabled = false;
-        goBtn.textContent = 'Искать';
-        if (currentUnsub) { currentUnsub(); currentUnsub = null; }
-      }
-    });
-  } catch (e) {
-    results.innerHTML = `<div class="error">Ошибка: ${e.message}</div>`;
-    goBtn.disabled = false;
-    goBtn.textContent = 'Искать';
-  }
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
-}
-
-goBtn.addEventListener('click', doSearch);
-qInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSearch();
+const presentation = document.getElementById("presentation");
+scenes.forEach((scene, index) => {
+    const section = document.createElement("section");
+    section.className = "scene";
+    const image = document.createElement("img");
+    image.className = "scene-image";
+    image.src = "./" + scene.image;
+    image.alt = "PETYA";
+    image.onerror = () => { section.remove(); updateProgress(); };
+    const content = document.createElement("div");
+    content.className = "scene-content";
+    const number = document.createElement("div");
+    number.className = "scene-number";
+    number.textContent = `PETYA / ${String(index + 1).padStart(2, "0")}`;
+    const title = document.createElement("div");
+    title.className = "scene-title";
+    title.innerHTML = scene.title;
+    const subtitle = document.createElement("div");
+    subtitle.className = "scene-subtitle";
+    subtitle.textContent = scene.subtitle;
+    const description = document.createElement("div");
+    description.className = "scene-description";
+    description.textContent = scene.description;
+    content.appendChild(number);
+    content.appendChild(title);
+    content.appendChild(subtitle);
+    content.appendChild(description);
+    section.appendChild(image);
+    section.appendChild(content);
+    presentation.appendChild(section);
 });
+
+const progress = document.getElementById("progress");
+function updateProgress() {
+    progress.innerHTML = "";
+    document.querySelectorAll(".scene").forEach(() => {
+        const dot = document.createElement("div");
+        dot.className = "progress-dot";
+        progress.appendChild(dot);
+    });
+}
+updateProgress();
+
+let currentScene = 0;
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio > .5) {
+            const sections = [...document.querySelectorAll(".scene")];
+            const index = sections.indexOf(entry.target);
+            if (index !== -1) {
+                currentScene = index;
+                entry.target.classList.add("active");
+                updateDots(index);
+            }
+        }
+    });
+}, { threshold: [.5] });
+
+function observeScenes() {
+    document.querySelectorAll(".scene").forEach(s => observer.observe(s));
+}
+observeScenes();
+
+function updateDots(index) {
+    document.querySelectorAll(".progress-dot").forEach((dot, i) => {
+        dot.classList.toggle("active", i === index);
+    });
+}
+
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        document.getElementById("loader").classList.add("hide");
+        const first = document.querySelector(".first");
+        if (first) first.classList.add("active");
+        updateDots(0);
+    }, 1700);
+});
+
+window.addEventListener("scroll", () => {
+    document.querySelectorAll(".scene").forEach(section => {
+        const image = section.querySelector(".scene-image");
+        if (!image) return;
+        const rect = section.getBoundingClientRect();
+        const distance = rect.top / window.innerHeight;
+        const move = distance * -40;
+        if (Math.abs(distance) < 1) {
+            image.style.transform = `scale(1.04) translateY(${move}px)`;
+        }
+    });
+}, { passive: true });
 </script>
 </body>
 </html>
