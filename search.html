@@ -26,7 +26,6 @@ body {
 }
 @keyframes overlayIn { to { opacity: 1; } }
 
-/* TOP BAR */
 .top-bar {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 24px; flex-shrink: 0;
@@ -40,7 +39,6 @@ body {
 .back-btn:hover { color: #fff; border-color: #fff; background: #151515; }
 .title { font-size: 12px; letter-spacing: 6px; color: #444; text-transform: uppercase; }
 
-/* SEARCH */
 .search-wrap {
     display: flex; gap: 12px;
     max-width: 900px; width: 100%;
@@ -65,7 +63,6 @@ body {
 .search-btn:active { transform: scale(.98); }
 .search-btn:disabled { background: #2a2a2a; color: #666; cursor: wait; transform: none; }
 
-/* OPTIONS */
 .options {
     display: flex; gap: 16px;
     max-width: 900px; margin: 0 auto 40px;
@@ -85,14 +82,11 @@ body {
 .options select:focus, .options input:focus { border-color: #fff; }
 .options select option { background: #141414; color: #fff; }
 
-/* =============================
-   ОГРОМНЫЙ ЗАПРОС — СПРАВА
-   ============================= */
 .big-query {
     display: none;
     width: 100%;
     max-width: 1400px;
-    margin: 30px auto 0;
+    margin: 30px auto 40px;
     padding: 0 20px;
     text-align: right;
     flex-shrink: 0;
@@ -102,21 +96,10 @@ body {
     animation: queryRise 1s cubic-bezier(.2,.8,.2,1) forwards;
 }
 @keyframes queryRise {
-    0% {
-        opacity: 0;
-        transform: translateY(80px);
-        filter: blur(12px);
-    }
-    60% {
-        opacity: 1;
-        filter: blur(0);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    0%   { opacity: 0; transform: translateY(80px); filter: blur(12px); }
+    60%  { opacity: 1; filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0); }
 }
-
 .big-query .value {
     font-size: clamp(56px, 12vw, 190px);
     font-weight: 900;
@@ -125,19 +108,15 @@ body {
     color: #fff;
     word-break: break-all;
     display: inline-block;
-    position: relative;
 }
-
 .big-query .count {
     margin-top: 28px;
     font-size: 14px;
     color: #666;
     letter-spacing: 4px;
     text-transform: uppercase;
-    text-align: right;
 }
 
-/* STATUS */
 .status-text {
     text-align: center; color: #666; font-size: 12px;
     letter-spacing: 5px; padding: 40px 0;
@@ -151,99 +130,138 @@ body {
 }
 .status-text.error { color: #ff5555; animation: none; }
 
-/* =============================
-   РЕЗУЛЬТАТЫ — ВЫЕЗЖАЮТ ПРИ СКРОЛЛЕ
-   ============================= */
+/* СПИСОК БАЗ ВНИЗ */
 .results {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 60px 20px 120px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    align-content: start;
+    padding: 20px 20px 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
 }
 
-.card {
-    background: #141414;
-    border: 1px solid #1e1e1e;
-    border-radius: 18px;
-    padding: 16px 18px;
-    word-break: break-word;
+.db-block {
+    background: #101010;
+    border: 1px solid #1c1c1c;
+    border-radius: 24px;
     overflow: hidden;
-    position: relative;
-
     opacity: 0;
     transform: translateY(60px);
     transition:
         opacity .8s cubic-bezier(.2,.8,.2,1),
         transform .9s cubic-bezier(.2,.8,.2,1),
-        border-color .3s ease,
-        background .3s ease,
-        box-shadow .3s ease;
+        border-color .3s ease;
 }
-.card.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-.card:hover {
-    border-color: #444;
-    background: #1a1a1a;
-    transform: translateY(-4px);
-    box-shadow: 0 16px 36px rgba(0,0,0,.6);
+.db-block.visible { opacity: 1; transform: translateY(0); }
+.db-block:hover { border-color: #2a2a2a; }
+
+.db-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 26px;
+    background: #141414;
+    border-bottom: 1px solid #1c1c1c;
 }
 
-.card .source {
-    display: inline-block;
-    font-size: 9px;
-    color: #777;
+.db-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #1e1e1e, #0d0d0d);
+    border: 1px solid #262626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.db-logo img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    padding: 6px;
+    display: block;
+}
+
+.db-info {
+    display: flex; flex-direction: column; gap: 4px;
+    overflow: hidden; flex: 1;
+}
+.db-name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.db-sub {
+    font-size: 11px;
+    color: #555;
     letter-spacing: 2px;
     text-transform: uppercase;
+}
+.db-count {
     background: #1e1e1e;
     border-radius: 999px;
-    padding: 4px 12px;
-    margin-bottom: 12px;
-    font-weight: 600;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: #ccc;
+    font-weight: 700;
+    letter-spacing: 1px;
+    flex-shrink: 0;
 }
 
-.card .fields {
-    display: flex; flex-direction: column; gap: 6px;
-}
-.card .field-row {
-    display: flex; justify-content: space-between; gap: 10px;
-    padding: 6px 10px;
-    background: #0f0f0f;
-    border-radius: 8px;
-    border: 1px solid #1a1a1a;
-}
-.card .field-name {
-    font-size: 10px; color: #777;
-    text-transform: uppercase; letter-spacing: 1px;
-    flex-shrink: 0; font-weight: 600;
-}
-.card .field-value {
-    font-size: 12px; color: #eee;
-    font-family: 'SF Mono', Monaco, Consolas, monospace;
-    text-align: right; word-break: break-all;
+/* ДАННЫЕ — СПИСОК ВНИЗ */
+.db-data {
+    padding: 4px 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-.card .raw {
-    font-size: 12px; color: #ccc;
-    white-space: pre-wrap; line-height: 1.5;
+.data-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    transition: .25s ease;
+    border-bottom: 1px solid #161616;
+}
+.data-row:last-child { border-bottom: none; }
+.data-row:hover { background: #161616; }
+
+.data-row .key {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 140px;
+    padding-top: 3px;
+}
+.data-row .val {
+    font-size: 15px;
+    color: #fff;
     font-family: 'SF Mono', Monaco, Consolas, monospace;
+    line-height: 1.4;
+    word-break: break-all;
+    flex: 1;
 }
 
 .empty {
-    grid-column: 1 / -1;
     text-align: center; color: #444;
     font-size: 13px; letter-spacing: 4px;
     padding: 60px 0; text-transform: uppercase;
 }
 
-/* MOBILE */
 @media (max-width: 700px) {
-    .overlay { padding: 16px 16px 40px; }
+    .overlay { padding: 16px 12px 40px; }
     .search-wrap { flex-direction: column; }
     .search-btn { padding: 12px; width: 100%; }
     .big-query { text-align: right; padding: 0 8px; }
@@ -252,7 +270,15 @@ body {
         letter-spacing: -3px;
     }
     .big-query .count { font-size: 11px; letter-spacing: 2px; }
-    .results { grid-template-columns: 1fr; padding: 30px 8px 80px; }
+    .results { padding: 10px 0 80px; gap: 18px; }
+    .db-header { padding: 14px 16px; gap: 12px; }
+    .db-logo { width: 52px; height: 52px; border-radius: 14px; font-size: 26px; }
+    .db-name { font-size: 16px; }
+    .db-count { font-size: 11px; padding: 4px 12px; }
+    .db-data { padding: 4px 14px 16px; }
+    .data-row { flex-direction: column; gap: 4px; padding: 12px 12px; }
+    .data-row .key { min-width: 0; padding-top: 0; font-size: 10px; }
+    .data-row .val { font-size: 14px; }
 }
 </style>
 </head>
@@ -310,7 +336,6 @@ body {
         </label>
     </div>
 
-    <!-- ОГРОМНЫЙ ЗАПРОС СПРАВА -->
     <div class="big-query" id="big-query">
         <div class="value" id="big-query-value">—</div>
         <div class="count" id="big-query-count"></div>
@@ -349,21 +374,72 @@ const bigQueryCount = document.getElementById('big-query-count');
 
 let currentUnsub = null;
 
-const cardObserver = new IntersectionObserver((entries) => {
+/* ==============================
+   LOGO MAP — какие PNG использовать
+   ============================== */
+const LOGO_MAP = [
+    { match: /mvd/i,                    file: "mvd.png",          emoji: "🛡" },
+    { match: /gosuslugi|gos_uslugi/i,   file: "gosuslugi.png",    emoji: "🇷🇺" },
+    { match: /nalogru|nalog/i,          file: "nalogru.png",      emoji: "💰" },
+    { match: /foms/i,                   file: "foms.png",         emoji: "🏥" },
+    { match: /sber/i,                   file: "sber.png",         emoji: "🏦" },
+    { match: /sdek/i,                   file: "sdek.png",         emoji: "📦" },
+    { match: /fargo/i,                  file: "fargo.png",        emoji: "🚚" },
+    { match: /yandex/i,                 file: "yandex.png",       emoji: "🌐" },
+    { match: /whoosh/i,                 file: "whoosh.png",       emoji: "🛴" },
+    { match: /tele2/i,                  file: "tele2.png",        emoji: "📱" },
+    { match: /bilain/i,                 file: "bilain.png",       emoji: "📞" },
+    { match: /tg[_\d]|telegram/i,       file: "tg.png",           emoji: "✈" },
+    { match: /kreditkz|kredit/i,        file: "kreditkz.png",     emoji: "📊" },
+    { match: /zhiteli_kz|zhiteli/i,     file: "zhiteli_kz.png",   emoji: "🏘" },
+    { match: /reg_kz|registration.*kz/i,file: "reg_kz.png",       emoji: "📝" },
+    { match: /rodstven/i,               file: "rodstvenniki.png", emoji: "👥" },
+    { match: /egaz/i,                   file: "egaz.png",         emoji: "🔥" },
+    { match: /avia/i,                   file: "avia.png",         emoji: "✈" },
+    { match: /zakazy/i,                 file: "zakazy.png",       emoji: "🛒" },
+    { match: /kriptopro|cryptopro/i,    file: "kriptopro.png",    emoji: "🔐" },
+    { match: /postgres/i,               file: "postgres.png",     emoji: "🐘" },
+];
+
+function getLogoInfo(source) {
+    for (const item of LOGO_MAP) {
+        if (item.match.test(source)) return item;
+    }
+    return { file: "default.png", emoji: "🗄" };
+}
+
+/* красивое имя базы */
+function prettyName(source) {
+    return source
+        .replace(/\.db$/i, "")
+        .replace(/^database[_\s]*/i, "")
+        .replace(/_/g, " ")
+        .toUpperCase();
+}
+
+/* вставка логотипа — с fallback на эмодзи */
+function renderLogo(container, source) {
+    const info = getLogoInfo(source);
+    const img = document.createElement('img');
+    img.src = info.file;
+    img.alt = "";
+    img.onerror = () => {
+        img.remove();
+        container.textContent = info.emoji;
+    };
+    container.innerHTML = '';
+    container.appendChild(img);
+}
+
+/* IntersectionObserver */
+const blockObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             entry.target.classList.add('visible');
-            cardObserver.unobserve(entry.target);
+            blockObserver.unobserve(entry.target);
         }
     });
-}, {
-    threshold: 0.1,
-    rootMargin: '0px 0px -40px 0px'
-});
-
-function observeCard(card) {
-    cardObserver.observe(card);
-}
+}, { threshold: 0.05, rootMargin: '0px 0px -60px 0px' });
 
 async function doSearch() {
     const q = qInput.value.trim();
@@ -430,34 +506,88 @@ async function doSearch() {
                 if (!items.length) {
                     results.innerHTML = '<div class="empty">Ничего не найдено</div>';
                 } else {
-                    results.innerHTML = '';
+                    const grouped = {};
                     for (const r of items) {
-                        const card = document.createElement('div');
-                        card.className = 'card';
+                        if (!grouped[r.source]) grouped[r.source] = [];
+                        grouped[r.source].push(r);
+                    }
 
-                        if (r.fields && r.fields.length) {
-                            let fieldsHtml = '';
-                            for (const f of r.fields) {
-                                fieldsHtml += `
-                                    <div class="field-row">
-                                        <div class="field-name">${escapeHtml(f.name)}</div>
-                                        <div class="field-value">${escapeHtml(f.value)}</div>
-                                    </div>
+                    results.innerHTML = '';
+
+                    for (const [source, rows] of Object.entries(grouped)) {
+                        const block = document.createElement('div');
+                        block.className = 'db-block';
+
+                        /* заголовок */
+                        const header = document.createElement('div');
+                        header.className = 'db-header';
+
+                        const logo = document.createElement('div');
+                        logo.className = 'db-logo';
+                        renderLogo(logo, source);
+
+                        const info = document.createElement('div');
+                        info.className = 'db-info';
+
+                        const name = document.createElement('div');
+                        name.className = 'db-name';
+                        name.textContent = prettyName(source);
+
+                        const sub = document.createElement('div');
+                        sub.className = 'db-sub';
+                        sub.textContent = source;
+
+                        info.appendChild(name);
+                        info.appendChild(sub);
+
+                        const count = document.createElement('div');
+                        count.className = 'db-count';
+                        count.textContent = `${rows.length} ${rows.length === 1 ? 'запись' : 'записей'}`;
+
+                        header.appendChild(logo);
+                        header.appendChild(info);
+                        header.appendChild(count);
+
+                        /* данные — список вниз */
+                        const dataWrap = document.createElement('div');
+                        dataWrap.className = 'db-data';
+
+                        for (let ri = 0; ri < rows.length; ri++) {
+                            const r = rows[ri];
+
+                            if (r.fields && r.fields.length) {
+                                for (const f of r.fields) {
+                                    const row = document.createElement('div');
+                                    row.className = 'data-row';
+                                    row.innerHTML = `
+                                        <div class="key">${escapeHtml(f.name)}</div>
+                                        <div class="val">${escapeHtml(f.value)}</div>
+                                    `;
+                                    dataWrap.appendChild(row);
+                                }
+                            } else {
+                                const row = document.createElement('div');
+                                row.className = 'data-row';
+                                row.innerHTML = `
+                                    <div class="key">Строка</div>
+                                    <div class="val">${escapeHtml(r.raw)}</div>
                                 `;
+                                dataWrap.appendChild(row);
                             }
-                            card.innerHTML = `
-                                <div class="source">${escapeHtml(r.source)}</div>
-                                <div class="fields">${fieldsHtml}</div>
-                            `;
-                        } else {
-                            card.innerHTML = `
-                                <div class="source">${escapeHtml(r.source)}</div>
-                                <div class="raw">${escapeHtml(r.raw)}</div>
-                            `;
+
+                            if (ri < rows.length - 1) {
+                                const sep = document.createElement('div');
+                                sep.style.height = '1px';
+                                sep.style.background = '#1a1a1a';
+                                sep.style.margin = '12px 0 6px';
+                                dataWrap.appendChild(sep);
+                            }
                         }
 
-                        results.appendChild(card);
-                        observeCard(card);
+                        block.appendChild(header);
+                        block.appendChild(dataWrap);
+                        results.appendChild(block);
+                        blockObserver.observe(block);
                     }
                 }
 
